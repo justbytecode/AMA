@@ -6,7 +6,7 @@ import { Menu, ChevronDown, ArrowUpRight, Github, Linkedin, Mail, Moon, Sun, X }
 import { useTheme } from "next-themes"
 import { fetchPortfolioData } from "@/utils/csv-parser"
 import type { PortfolioItem } from "@/utils/csv-parser"
-import { FeaturedProjects } from "@/components/featured-projects"
+import  FeaturedProjects  from "@/components/featured-projects"
 
 function useShootingStars() {
   useEffect(() => {
@@ -878,7 +878,7 @@ export default function Home() {
       <div className="container px-4 md:px-6 mt-28 md:mt-24">
         <Hero />
         <TechStack />
-        <FeaturedProjects />
+        {/* <FeaturedProjects /> */}
         <HireFreelancer />
         <Skills />
         {/* <Projects /> */}

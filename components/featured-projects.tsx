@@ -1,336 +1,372 @@
-"use client"
+'use client'
 
-import type React from "react"
+import { useState, useRef, useEffect } from 'react'
+import Link from 'next/link'
+import { ArrowRight, Home, ChevronLeft, ChevronRight } from 'lucide-react'
 
-import { useState, useEffect, useRef } from "react"
-import Image from "next/image"
-import { ArrowUpRight, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react"
-
-interface PortfolioItem {
-  slug: string
+interface Project {
+  id: string
   title: string
-  shortDescription: string
-  mainImage: string
-  link?: string
+  description: string
+  category: string
+  image: string
+  homeUrl: string
+  viewUrl: string
+  tags: string[]
 }
 
-const PORTFOLIO_DATA: PortfolioItem[] = [
+const projects: Project[] = [
   {
-    slug: "recurx",
-    title: "RecurX",
-    shortDescription:
-      "Decentralized recurring payment platform for Web3. Built with Solidity smart contracts and Next.js, supporting 10K+ wallet transactions.",
-    mainImage: "/recurx-project.jpg",
-    link: "https://recurx.io",
+    id: '1',
+    title: 'Digital Commerce Platform',
+    description: 'A modern e-commerce solution with real-time inventory management and seamless checkout experience.',
+    category: 'E-Commerce',
+    image: '/modern-ecommerce-dashboard.png',
+    homeUrl: '/',
+    viewUrl: '#',
+    tags: ['React', 'Next.js', 'Stripe'],
   },
   {
-    slug: "predixai",
-    title: "PredixAI",
-    shortDescription:
-      "AI-powered predictive analytics platform using machine learning models. Handles 100K+ daily inference requests with real-time data processing.",
-    mainImage: "/predixai-project.jpg",
-    link: "https://www.predixai.in",
+    id: '2',
+    title: 'Creative Design Studio',
+    description: 'Portfolio showcase platform for designers to display their work with interactive galleries and client testimonials.',
+    category: 'Portfolio',
+    image: '/creative-design-portfolio-website.jpg',
+    homeUrl: '/',
+    viewUrl: '#',
+    tags: ['Design', 'Portfolio', 'Web'],
   },
   {
-    slug: "saas-dashboard-1",
-    title: "SaaS Dashboard",
-    shortDescription:
-      "Full-stack web application with Next.js, PostgreSQL, and authentication. Features real-time analytics, user management, and payment integration.",
-    mainImage: "/saas-dashboard.jpg",
-    link: "https://example-saas.io",
+    id: '3',
+    title: 'Health & Wellness App',
+    description: 'Comprehensive wellness platform featuring personalized workout plans, nutrition tracking, and progress analytics.',
+    category: 'Health',
+    image: '/health-wellness-dashboard-app.jpg',
+    homeUrl: '/',
+    viewUrl: '#',
+    tags: ['Health', 'Fitness', 'Analytics'],
   },
   {
-    slug: "saas-dashboard-2",
-    title: "SaaS Dashboard",
-    shortDescription:
-      "Full-stack web application with Next.js, PostgreSQL, and authentication. Features real-time analytics, user management, and payment integration.",
-    mainImage: "/saas-dashboard.jpg",
-    link: "https://example-saas.io",
+    id: '4',
+    title: 'Financial Dashboard',
+    description: 'Enterprise-grade financial management system with real-time data visualization and advanced reporting tools.',
+    category: 'Finance',
+    image: '/financial-dashboard-analytics.png',
+    homeUrl: '/',
+    viewUrl: '#',
+    tags: ['Finance', 'Analytics', 'Enterprise'],
   },
   {
-    slug: "saas-dashboard-3",
-    title: "SaaS Dashboard",
-    shortDescription:
-      "Full-stack web application with Next.js, PostgreSQL, and authentication. Features real-time analytics, user management, and payment integration.",
-    mainImage: "/saas-dashboard.jpg",
-    link: "https://example-saas.io",
+    id: '5',
+    title: 'Collaboration Suite',
+    description: 'Team productivity platform with real-time collaboration, task management, and integrated communication tools.',
+    category: 'Productivity',
+    image: '/team-collaboration-workspace-interface.jpg',
+    homeUrl: '/',
+    viewUrl: '#',
+    tags: ['Collaboration', 'Productivity', 'SaaS'],
   },
   {
-    slug: "saas-dashboard-4",
-    title: "SaaS Dashboard",
-    shortDescription:
-      "Full-stack web application with Next.js, PostgreSQL, and authentication. Features real-time analytics, user management, and payment integration.",
-    mainImage: "/saas-dashboard.jpg",
-    link: "https://example-saas.io",
+    id: '6',
+    title: 'Content Management Hub',
+    description: 'Intuitive CMS platform allowing creators to manage, organize, and publish content across multiple channels efficiently.',
+    category: 'CMS',
+    image: '/content-management-interface-dashboard.jpg',
+    homeUrl: '/',
+    viewUrl: '#',
+    tags: ['CMS', 'Content', 'Publishing'],
   },
   {
-    slug: "saas-dashboard-5",
-    title: "SaaS Dashboard",
-    shortDescription:
-      "Full-stack web application with Next.js, PostgreSQL, and authentication. Features real-time analytics, user management, and payment integration.",
-    mainImage: "/saas-dashboard.jpg",
-    link: "https://example-saas.io",
+    id: '7',
+    title: 'AI-Powered Analytics',
+    description: 'Next-generation analytics engine leveraging machine learning to provide actionable insights from complex datasets.',
+    category: 'AI/ML',
+    image: '/artificial-intelligence-data-analytics.jpg',
+    homeUrl: '/',
+    viewUrl: '#',
+    tags: ['AI', 'Analytics', 'ML'],
   },
   {
-    slug: "saas-dashboard-6",
-    title: "SaaS Dashboard",
-    shortDescription:
-      "Full-stack web application with Next.js, PostgreSQL, and authentication. Features real-time analytics, user management, and payment integration.",
-    mainImage: "/saas-dashboard.jpg",
-    link: "https://example-saas.io",
+    id: '8',
+    title: 'Social Network Platform',
+    description: 'Community-driven social platform with real-time messaging, content feeds, and advanced networking capabilities.',
+    category: 'Social',
+    image: '/social-network-interface-community.jpg',
+    homeUrl: '/',
+    viewUrl: '#',
+    tags: ['Social', 'Community', 'Network'],
   },
 ]
 
-export function FeaturedProjects() {
-  const [projects] = useState<PortfolioItem[]>(PORTFOLIO_DATA)
-  const [isLoading, setIsLoading] = useState(true)
-  const [scrollPosition, setScrollPosition] = useState(0)
-  const [isInteracting, setIsInteracting] = useState(false)
-  const [isPaused, setIsPaused] = useState(false)
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const carouselRef = useRef<HTMLDivElement>(null)
-  const carouselInnerRef = useRef<HTMLDivElement>(null)
-  const touchStartX = useRef<number>(0)
-  const autoScrollRef = useRef<NodeJS.Timeout | null>(null)
-
-  useEffect(() => {
-    // Simulate initial loading
-    const timer = setTimeout(() => {
-      setIsLoading(false)
-    }, 300)
-
-    return () => clearTimeout(timer)
-  }, [])
-
-  // Auto-scroll effect
-  useEffect(() => {
-    if (isPaused || isInteracting) {
-      if (autoScrollRef.current) {
-        clearInterval(autoScrollRef.current)
-      }
-      return
-    }
-
-    autoScrollRef.current = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % projects.length)
-    }, 3000)
-
-    return () => {
-      if (autoScrollRef.current) {
-        clearInterval(autoScrollRef.current)
-      }
-    }
-  }, [isPaused, isInteracting, projects.length])
-
-  const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    touchStartX.current = e.touches[0].clientX
-    setIsInteracting(true)
-  }
-
-  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    if (!carouselRef.current) return
-
-    const touchCurrentX = e.touches[0].clientX
-    const diff = touchCurrentX - touchStartX.current
-    const rect = carouselRef.current.getBoundingClientRect()
-
-    const maxScroll = 100
-    const newPosition = (diff / rect.width) * maxScroll * 0.3
-
-    setScrollPosition(newPosition)
-  }
-
-  const handleTouchEnd = () => {
-    setScrollPosition(0)
-    setIsInteracting(false)
-  }
-
-  const handlePrevious = () => {
-    setCurrentIndex((prev) => (prev - 1 + projects.length) % projects.length)
-  }
-
-  const handleNext = () => {
-    setCurrentIndex((prev) => (prev + 1) % projects.length)
-  }
-
-  const handleDotClick = (index: number) => {
-    setCurrentIndex(index)
-  }
-
-  const togglePause = () => {
-    setIsPaused((prev) => !prev)
-  }
-
-  const duplicatedProjects = [...projects, ...projects]
-
-  // Calculate transform based on currentIndex
-  const calculateTransform = () => {
-    if (isInteracting) {
-      return `translateX(calc(${scrollPosition}%))`
-    }
-    
-    const cardWidth = 320
-    const gap = 32
-    const totalWidth = cardWidth + gap
-    const offset = -(currentIndex * totalWidth)
-    
-    return `translateX(calc(${offset}px + ${scrollPosition}%))`
-  }
-
+export default function FeaturedProjects() {
   return (
-    <section className="my-8 sm:my-12 md:my-16 lg:my-20 xl:my-24">
-      <div className="mb-8 sm:mb-10 md:mb-12 px-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-2">
-          Featured
-          <span className="block text-[#0EA5E9]">Projects</span>
-        </h2>
-        <p className="max-w-2xl text-xs sm:text-sm md:text-base text-gray-700 dark:text-gray-300">
-          A collection of my best work showcasing full-stack development, Web3 integration, and AI-powered solutions.
-          Explore my projects below.
-        </p>
-      </div>
+    <main className="min-h-screen bg-background">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden px-6 py-20 sm:py-32">
+        <div className="mx-auto max-w-7xl">
+          <div className="absolute inset-0 -z-10 overflow-hidden">
+            <div className="absolute -top-40 -right-40 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
+            <div className="absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-accent/10 blur-3xl" />
+          </div>
 
-      <div className="relative">
-        <div
-          className="relative overflow-hidden py-4 cursor-grab active:cursor-grabbing"
-          ref={carouselRef}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
-        >
-          <div className="absolute left-0 top-0 bottom-0 w-8 sm:w-12 md:w-16 lg:w-20 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none"></div>
-          <div className="absolute right-0 top-0 bottom-0 w-8 sm:w-12 md:w-16 lg:w-20 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none"></div>
-
-          {isLoading ? (
-            <div className="flex gap-4 sm:gap-5 md:gap-6 lg:gap-8 px-4 sm:px-6 lg:px-8">
-              {Array.from({ length: 3 }).map((_, index) => (
-                <div
-                  key={`skeleton-${index}`}
-                  className="flex-shrink-0 w-64 sm:w-72 md:w-80 rounded-2xl overflow-hidden shadow-lg animate-pulse"
-                >
-                  <div className="h-48 sm:h-56 md:h-64 lg:h-80 bg-gray-200 dark:bg-gray-700"></div>
-                  <div className="p-4 sm:p-5 md:p-6">
-                    <div className="h-5 sm:h-6 w-2/3 bg-gray-200 dark:bg-gray-700 rounded mb-2 sm:mb-3"></div>
-                    <div className="h-3 sm:h-4 w-full bg-gray-200 dark:bg-gray-700 rounded"></div>
-                  </div>
-                </div>
-              ))}
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <div className="inline-block">
+                <span className="text-xs font-semibold tracking-widest text-accent uppercase px-4 py-2 bg-accent/10 rounded-full">
+                  Featured Projects
+                </span>
+              </div>
+              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight text-foreground text-balance leading-tight">
+                Explore Our Digital Solutions
+              </h1>
             </div>
-          ) : (
-            <div
-              ref={carouselInnerRef}
-              className="flex gap-4 sm:gap-5 md:gap-6 lg:gap-8 px-4 sm:px-6 lg:px-8"
-              style={{
-                transform: calculateTransform(),
-                transition: isInteracting ? "none" : "transform 0.5s ease-out",
-              }}
-            >
-              {duplicatedProjects.map((project, index) => (
-                <div
-                  key={`${project.slug}-${index}`}
-                  className="group relative flex-shrink-0 w-64 sm:w-72 md:w-80"
-                >
-                  <div className="rounded-xl sm:rounded-2xl overflow-hidden shadow-lg transition-shadow duration-300 bg-white dark:bg-[#111111] h-full">
-                    <div className="relative overflow-hidden h-48 sm:h-56 md:h-64 lg:h-80 bg-gradient-to-br from-gray-900 to-gray-800">
-                      <Image
-                        src={project.mainImage || "/placeholder.svg?height=600&width=800&query=portfolio+project"}
-                        alt={project.title}
-                        width={600}
-                        height={500}
-                        className="w-full h-full object-cover"
-                      />
-
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-                      
-                      <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 md:p-6 lg:p-8">
-                        <h3 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-white mb-2">
-                          {project.title}
-                        </h3>
-                        
-                        <a
-                          href={project.link || "#"}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg bg-[#0EA5E9] text-white font-semibold text-xs sm:text-sm md:text-base hover:bg-[#0EA5E9]/90 transition-all duration-300 group/link w-fit"
-                        >
-                          View Project
-                          <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover/link:translate-x-1 group-hover/link:-translate-y-1" />
-                        </a>
-                      </div>
-                    </div>
-
-                    <div className="p-4 sm:p-5 md:p-6 lg:p-8">
-                      <h3 className="text-base sm:text-lg md:text-xl font-bold text-black dark:text-white mb-1.5 sm:mb-2 line-clamp-2">
-                        {project.title}
-                      </h3>
-                      <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm md:text-base line-clamp-3">
-                        {project.shortDescription}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+            <p className="max-w-2xl text-lg md:text-xl text-muted-foreground leading-relaxed">
+              Drag through our collection of innovative projects crafted with precision and creativity.
+            </p>
+          </div>
         </div>
+      </section>
 
-        {/* Controller */}
-        {!isLoading && projects.length > 0 && (
-          <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 px-4">
-            {/* Navigation Buttons */}
-            <div className="flex items-center gap-2 sm:gap-3">
-              <button
-                onClick={handlePrevious}
-                className="p-2 sm:p-2.5 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors duration-200"
-                aria-label="Previous project"
-              >
-                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+      {/* Draggable Carousel Section */}
+      <section className="relative px-6 py-20 sm:py-32 overflow-hidden">
+        <div className="mx-auto max-w-7xl">
+          <DraggableCarousel projects={projects} />
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="relative px-6 py-20 sm:py-28">
+        <div className="mx-auto max-w-4xl">
+          <div className="rounded-2xl bg-gradient-to-br from-primary/10 via-transparent to-accent/10 border border-primary/20 overflow-hidden">
+            <div className="px-8 py-16 sm:px-12 sm:py-20 text-center space-y-8">
+              <div className="space-y-4">
+                <h2 className="text-4xl md:text-5xl font-bold text-foreground text-balance">
+                  Ready to Start Your Project?
+                </h2>
+                <p className="text-lg text-muted-foreground leading-relaxed">
+                  Let's collaborate and create something extraordinary together.
+                </p>
+              </div>
+              <button className="inline-flex items-center justify-center px-8 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:shadow-lg hover:shadow-primary/40 transition-all duration-300 gap-2 hover:scale-105">
+                Get in Touch
+                <ArrowRight className="w-5 h-5" />
               </button>
-
-              <button
-                onClick={togglePause}
-                className="p-2 sm:p-2.5 rounded-full bg-[#0EA5E9] hover:bg-[#0EA5E9]/90 text-white transition-colors duration-200"
-                aria-label={isPaused ? "Play" : "Pause"}
-              >
-                {isPaused ? (
-                  <Play className="w-4 h-4 sm:w-5 sm:h-5" />
-                ) : (
-                  <Pause className="w-4 h-4 sm:w-5 sm:h-5" />
-                )}
-              </button>
-
-              <button
-                onClick={handleNext}
-                className="p-2 sm:p-2.5 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors duration-200"
-                aria-label="Next project"
-              >
-                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-            </div>
-
-            {/* Dot Indicators */}
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              {projects.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleDotClick(index)}
-                  className={`transition-all duration-300 rounded-full ${
-                    index === currentIndex
-                      ? "w-6 sm:w-8 h-2 sm:h-2.5 bg-[#0EA5E9]"
-                      : "w-2 sm:w-2.5 h-2 sm:h-2.5 bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 dark:hover:bg-gray-600"
-                  }`}
-                  aria-label={`Go to project ${index + 1}`}
-                />
-              ))}
-            </div>
-
-            {/* Counter */}
-            <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 font-medium">
-              {currentIndex + 1} / {projects.length}
             </div>
           </div>
-        )}
+        </div>
+      </section>
+    </main>
+  )
+}
+
+function DraggableCarousel({ projects }: { projects: Project[] }) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [isDragging, setIsDragging] = useState(false)
+  const [startX, setStartX] = useState(0)
+  const [scrollLeft, setScrollLeft] = useState(0)
+  const [currentIndex, setCurrentIndex] = useState(0)
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsDragging(true)
+    setStartX(e.pageX - (containerRef.current?.offsetLeft || 0))
+    setScrollLeft(containerRef.current?.scrollLeft || 0)
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging) return
+    e.preventDefault()
+    const x = e.pageX - (containerRef.current?.offsetLeft || 0)
+    const walk = (x - startX) * 1.5
+    if (containerRef.current) {
+      containerRef.current.scrollLeft = scrollLeft - walk
+    }
+  }
+
+  const handleMouseUp = () => {
+    setIsDragging(false)
+  }
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setIsDragging(true)
+    setStartX(e.touches[0].pageX - (containerRef.current?.offsetLeft || 0))
+    setScrollLeft(containerRef.current?.scrollLeft || 0)
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return
+    const x = e.touches[0].pageX - (containerRef.current?.offsetLeft || 0)
+    const walk = (x - startX) * 1.5
+    if (containerRef.current) {
+      containerRef.current.scrollLeft = scrollLeft - walk
+    }
+  }
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (containerRef.current) {
+      const scrollAmount = 400
+      containerRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth',
+      })
+    }
+  }
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (containerRef.current) {
+        const index = Math.round(
+          containerRef.current.scrollLeft / (containerRef.current.scrollWidth / projects.length)
+        )
+        setCurrentIndex(Math.min(index, projects.length - 1))
+      }
+    }
+
+    containerRef.current?.addEventListener('scroll', handleScroll)
+    return () => containerRef.current?.removeEventListener('scroll', handleScroll)
+  }, [projects.length])
+
+  return (
+    <div className="space-y-8">
+      {/* Carousel Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground">
+            Project Showcase
+          </h2>
+          <p className="text-muted-foreground mt-2">Drag to explore our work</p>
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={() => scroll('left')}
+            className="p-3 rounded-full bg-secondary hover:bg-accent/20 text-foreground transition-all duration-300 hover:scale-110"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={() => scroll('right')}
+            className="p-3 rounded-full bg-secondary hover:bg-accent/20 text-foreground transition-all duration-300 hover:scale-110"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
       </div>
-    </section>
+
+      {/* Draggable Container */}
+      <div className="relative">
+        <div
+          ref={containerRef}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleMouseUp}
+          className={`flex gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 ${
+            isDragging ? 'cursor-grabbing' : 'cursor-grab'
+          }`}
+          style={{
+            scrollBehavior: 'smooth',
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
+          {projects.map((project, index) => (
+            <div
+              key={project.id}
+              className="flex-shrink-0 w-80 snap-center group"
+              style={{
+                animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`,
+              }}
+            >
+              <CarouselCard project={project} />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Progress Indicator */}
+      <div className="flex items-center justify-center gap-2">
+        {projects.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => {
+              if (containerRef.current) {
+                containerRef.current.scrollTo({
+                  left: (index * 352), // 320px card + 32px gap
+                  behavior: 'smooth',
+                })
+              }
+            }}
+            className={`transition-all duration-300 ${
+              index === currentIndex
+                ? 'h-2 w-8 bg-accent rounded-full'
+                : 'h-2 w-2 bg-border rounded-full hover:bg-muted-foreground'
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function CarouselCard({ project }: { project: Project }) {
+  return (
+    <div className="group relative overflow-hidden rounded-2xl border border-border/50 bg-card h-96 transition-all duration-500 hover:border-accent/50 hover:shadow-2xl hover:shadow-accent/20">
+      {/* Image Container */}
+      <div className="relative h-full overflow-hidden bg-secondary">
+        <img
+          src={project.image || '/placeholder.svg'}
+          alt={project.title}
+          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/20 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+      </div>
+
+      {/* Content */}
+      <div className="absolute inset-0 flex flex-col justify-end p-6">
+        <div className="space-y-3 transform transition-all duration-500 translate-y-4 group-hover:translate-y-0">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold tracking-widest text-accent uppercase bg-accent/20 px-3 py-1 rounded-full">
+              {project.category}
+            </span>
+            <a
+              href={project.homeUrl}
+              className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 opacity-0 group-hover:opacity-100 hover:scale-110"
+              aria-label="Go to project home"
+            >
+              <Home className="w-5 h-5" />
+            </a>
+          </div>
+
+          <div>
+            <h3 className="text-xl font-bold text-background leading-snug line-clamp-2">
+              {project.title}
+            </h3>
+            <p className="text-background/90 text-sm leading-relaxed line-clamp-2 mt-2">
+              {project.description}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2 pt-2">
+            {project.tags.map((tag) => (
+              <span
+                key={tag}
+                className="text-xs font-medium text-background/80 bg-background/20 px-2.5 py-1 rounded-full backdrop-blur-sm"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          <a
+            href={project.viewUrl}
+            className="inline-flex items-center gap-2 text-background font-semibold hover:gap-3 transition-all duration-300 pt-3"
+          >
+            View Project
+            <ArrowRight className="w-4 h-4" />
+          </a>
+        </div>
+      </div>
+    </div>
   )
 }

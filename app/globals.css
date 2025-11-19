@@ -272,3 +272,18 @@
 .qr-dropdown {
   animation: slideDown 0.4s ease-out forwards;
 }
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  .transition-smooth {
+    @apply transition-all duration-500 ease-in-out;
+  }
+}
